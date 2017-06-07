@@ -122,6 +122,20 @@ $app->put('/produto/{codigodebarras}/', function($request, $response, $args) {
   return $response->getBody()->write($produto->toJson());
 });
 
+$app->put('/produto/{codigodebarras}/adicionar/quantidade/', function($request, $response, $args) {
+  $codigodebarras = $args['codigodebarras'];
+  $data = $request->getParsedBody();
+  $produto = Produto::find($codigodebarras);
+
+  if(is_null($produto))
+    return $response->withStatus(404);
+
+  $produto->quantidade = $data['quantidade']+$produto->quantidade;
+  $produto->save();
+
+  return $response->getBody()->write($produto->toJson());
+});
+
 
 $app->post('/produto/', function($request, $response, $args) {
   $data = $request->getParsedBody();
@@ -168,6 +182,23 @@ $app->get('/compra/cliente/{cpf}/', function($request, $response, $args) {
   return $response->getBody()->write($compra->toJson());
 });
 
+$app->post('/compra/', function($request, $response, $args) {
+  $data = $request->getParsedBody();
+
+  $cliente = Cliente::find($data['cpfcliente']);
+  if(is_null($cliente))
+    return $response->withStatus(404);
+
+  $compra = new Compra();
+  $compra->cpfcliente =  $cliente->cpfcliente;
+  $compra->valor = $data['valor'];
+  $compra->data = $data['data'];
+  $compra->save();
+
+  return $response->withStatus(201)->getBody()->write($produto->toJson());
+});
+
+
 
 //-------------------------------------------------------------------
 //Pagamento
@@ -187,6 +218,23 @@ $app->get('/pagamento/cliente/{cpf}/', function($request, $response, $args) {
   $cpf = $args['cpf'];
   $pagamento = Pagamento::where('cpfcliente',$cpf)->get();
   return $response->getBody()->write($pagamento->toJson());
+});
+
+$app->post('/pagamento/', function($request, $response, $args) {
+  $data = $request->getParsedBody();
+
+  $cliente = Cliente::find($data['cpfcliente']);
+  if(is_null($cliente))
+    return $response->withStatus(404);
+
+  $pagamento = new Pagamento();
+  $pagamento->cpfcliente = $cliente->cpfcliente;
+  $pagamento->valor = $data['valor'];
+  $pagamento->data = $data['data'];
+  $pagamento->tipo = $data['tipo'];
+  $pagamento->save();
+
+  return $response->withStatus(201)->getBody()->write($produto->toJson());
 });
 
 $app->run();
