@@ -25,6 +25,15 @@ $capsule->getContainer()->singleton(
   App\Exceptions\Handler::class
 );
 
+function response($response, $data) {
+    return $response
+            ->withHeader('Access-Control-Allow-Origin', 'http://localhost')
+            ->withHeader('Access-Control-Allow-Headers', 'X-Requested-With, Content-Type, Accept, Origin, Authorization')
+            ->withHeader('Access-Control-Allow-Credentials', 'true')
+            ->withHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+            ->write(json_encode($data));
+}
+
 //-------------------------------------------------------------------
 //Clientes
 $app->get('/cliente/', function($request, $response) {
@@ -165,7 +174,8 @@ $app->delete('/produto/{codigodebarras}/', function($request, $response, $args) 
 //-------------------------------------------------------------------
 //Compra
 $app->get('/compra/', function($request, $response) {
-  return $response->getBody()->write(Compra::all()->toJson());
+ /* return $response->getBody()->write(Compra::all()->toJson());*/
+  return response($response, Compra::all());
 });
 
 $app->get('/compra/{id}/', function($request, $response, $args) {
